@@ -9,15 +9,25 @@
 </head>
 <body>
   <header class="top">
+    <!-- TODO: podmień href na docelowy link do Instagrama -->
+    <a href="#" class="ig-btn" id="instagram-link" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+        <circle cx="12" cy="12" r="4.2"></circle>
+        <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"></circle>
+      </svg>
+    </a>
     <img src="jedynkalogo.png" alt="Spotted I LO Wodzisław Śląski" class="site-logo">
     <p>I Liceum Ogólnokształcące im. 14 Pułku Powstańców Śląskich, Anonimowe Spotted.</p>
     <p>Wpis o tobie którego nie lubisz? Kontakt instagram: styl</p>
   </header>
 
   <main>
-    <div id="compose-host"></div>
-    <div class="corkboard">
-      <section id="feed" class="board"></section>
+    <div class="layout-grid">
+      <div class="corkboard">
+        <section id="feed" class="board"></section>
+      </div>
+      <aside id="compose-host" class="compose-sidebar"></aside>
     </div>
   </main>
 
@@ -33,4 +43,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
