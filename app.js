@@ -88,10 +88,11 @@ function openModal(postId){
           </div>
           <div class="content">${esc(post.content)}</div>
         </article>
-      </div>
-      <div class="thread-side">
         <div class="thread-side-label" data-reply-heading>Odpowiedzi</div>
         <div class="reply-list" data-reply-list></div>
+      </div>
+      <div class="thread-side">
+        <div class="thread-side-label">Twoja odpowiedź</div>
         <div data-form-host></div>
       </div>
     </div>
