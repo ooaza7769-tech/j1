@@ -1,5 +1,14 @@
 const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let allPosts = [];
+let sortOrder = "new"; // "new" = najnowsze pierwsze (domyślnie), "old" = najstarsze pierwsze
+
+function sortMain(posts){
+  const arr = [...posts];
+  arr.sort((a, b) => sortOrder === "old"
+    ? new Date(a.created_at) - new Date(b.created_at)
+    : new Date(b.created_at) - new Date(a.created_at));
+  return arr;
+}
 
 function esc(str){
   const d = document.createElement("div");
@@ -33,8 +42,12 @@ async function loadFeed(){
 
   if (error){ feed.innerHTML = `<p class="empty-state">Nie udało się wczytać wpisów.</p>`; return; }
   allPosts = data || [];
+  renderFeed();
+}
 
-  const main = allPosts.filter(p=>!p.parent_id);
+function renderFeed(){
+  const feed = document.getElementById("feed");
+  const main = sortMain(allPosts.filter(p=>!p.parent_id));
   feed.innerHTML = "";
   if (main.length === 0){
     feed.innerHTML = `<p class="empty-state">Cicho tu jeszcze... bądź pierwszy/a.</p>`;
@@ -309,6 +322,17 @@ function buildForm({ parentId=null, small=false, onSuccess=null } = {}){
 
 window.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("compose-host").appendChild(buildForm());
+
+  document.querySelectorAll(".sort-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if (btn.classList.contains("active")) return;
+      document.querySelectorAll(".sort-btn").forEach(b=> b.classList.remove("active"));
+      btn.classList.add("active");
+      sortOrder = btn.dataset.sort;
+      renderFeed();
+    });
+  });
+
   await cleanupOld();
   loadFeed();
 });
