@@ -164,7 +164,38 @@ form.compose .nick-field{max-width:150px;}
 .btn.danger{background:var(--danger);}
 .btn.danger:hover{background:#96392C;}
 
-.turnstile-wrap{margin:.7rem 0;}
+.captcha-box{margin:.7rem 0;}
+.captcha-row{display:flex; align-items:center; gap:.5rem;}
+.captcha-canvas{
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:#EDECE6;
+  display:block;
+}
+.captcha-refresh{
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:6px;
+  width:38px; height:38px;
+  font-size:1.05rem;
+  color:var(--ink-soft);
+  cursor:pointer;
+  flex-shrink:0;
+}
+.captcha-refresh:hover{color:var(--ink); border-color:#D4D3CB;}
+.captcha-input{
+  margin-top:.5rem;
+  width:100%;
+  font-family:inherit;
+  font-size:.95rem;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--bg);
+  padding:.55rem .65rem;
+  color:var(--ink);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
 
 /* --- reply / zoom modal --- */
 .overlay{
