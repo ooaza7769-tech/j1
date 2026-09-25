@@ -143,6 +143,7 @@ main{
     flex:none;
     width:100%;
     position:static;
+    order:-1;
   }
 }
 
@@ -386,12 +387,12 @@ form.compose .nick-field{max-width:150px;}
 
 .thread-layout{
   display:flex;
-  flex-direction:column;
   gap:1.2rem;
+  align-items:flex-start;
 }
 .thread-main{
-  flex:none;
-  max-width:none;
+  flex:1.3;
+  min-width:0;
 }
 .thread-main-label{
   display:inline-block;
@@ -411,23 +412,21 @@ form.compose .nick-field{max-width:150px;}
 }
 .thread-main .note:hover{transform:rotate(-1.2deg);}
 .thread-main .content{font-size:1.02rem;}
-.thread-main .reply-to-main{margin-top:.8rem;}
+.thread-main .thread-side-label{margin-top:1rem;}
+.thread-main .reply-list{margin-bottom:0;}
 
 .thread-side{
   flex:1;
   min-width:0;
-  display:flex;
-  flex-direction:column;
+}
+@media (min-width:641px){
+  .thread-side{ border-left:1px solid var(--border); padding-left:1.2rem; }
 }
 .thread-side-label{
   font-size:.72rem; text-transform:uppercase; letter-spacing:.05em;
   color:var(--ink-soft); font-weight:700; margin:.2rem 0 .6rem;
   padding-bottom:.5rem;
   border-bottom:1px solid var(--border);
-}
-.thread-side{
-  border-top:1px solid var(--border);
-  padding-top:1rem;
 }
 .reply-list{display:flex; flex-direction:column; gap:.6rem; margin-bottom:1rem;}
 .reply{
@@ -471,7 +470,7 @@ form.compose .nick-field{max-width:150px;}
 
 @media (max-width:640px){
   .thread-layout{flex-direction:column;}
-  .thread-main{flex:1; max-width:none;}
+  .thread-main{flex:1;}
   .thread-main .note{transform:none;}
 }
 
