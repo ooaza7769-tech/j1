@@ -78,13 +78,23 @@ function openModal(postId){
   modal.className = "modal-card";
   modal.innerHTML = `
     <button type="button" class="modal-close" aria-label="Zamknij">✕</button>
-    <div class="meta">
-      <span class="nick">${post.nick ? esc(post.nick) : "Anonimowy"}</span>
-      <span>${fmtTime(post.created_at)}</span>
+    <div class="thread-layout">
+      <div class="thread-main">
+        <div class="thread-main-label">Wpis</div>
+        <article class="note">
+          <div class="meta">
+            <span class="nick">${post.nick ? esc(post.nick) : "Anonimowy"}</span>
+            <span>${fmtTime(post.created_at)}</span>
+          </div>
+          <div class="content">${esc(post.content)}</div>
+        </article>
+      </div>
+      <div class="thread-side">
+        <div class="thread-side-label" data-reply-heading>Odpowiedzi</div>
+        <div class="reply-list" data-reply-list></div>
+        <div data-form-host></div>
+      </div>
     </div>
-    <div class="content">${esc(post.content)}</div>
-    <div class="reply-list" data-reply-list></div>
-    <div data-form-host></div>
   `;
   modal.querySelector(".modal-close").addEventListener("click", closeModal);
   overlay.appendChild(modal);
@@ -108,6 +118,15 @@ function renderReplies(postId, host){
   const replies = allPosts.filter(p=>p.parent_id === postId)
     .sort((a,b)=> new Date(a.created_at) - new Date(b.created_at));
   host.innerHTML = "";
+
+  const heading = document.querySelector("[data-reply-heading]");
+  if (heading) heading.textContent = replies.length > 0 ? `Odpowiedzi (${replies.length})` : "Odpowiedzi";
+
+  if (replies.length === 0){
+    host.innerHTML = `<p class="no-replies-yet">Jeszcze nikt nie odpowiedział. Bądź pierwszy/a.</p>`;
+    return;
+  }
+
   replies.forEach(r=>{
     const rd = document.createElement("div");
     rd.className = "reply";
@@ -292,4 +311,3 @@ window.addEventListener("DOMContentLoaded", async ()=>{
   await cleanupOld();
   loadFeed();
 });
-
