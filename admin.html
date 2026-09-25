@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel admina — Spotted</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header class="top"><h1>Panel admina</h1></header>
+
+  <div id="login-view" class="page login-box">
+    <h2>Logowanie</h2>
+    <input type="email" id="email" placeholder="email administratora">
+    <input type="password" id="password" placeholder="hasło">
+    <button class="btn" id="login-btn" style="width:100%">Zaloguj</button>
+    <div class="error-msg" id="login-err"></div>
+  </div>
+
+  <div id="panel-view" style="display:none;">
+    <div class="admin-bar">
+      <span>Zalogowano jako administrator</span>
+      <button class="btn secondary" id="logout-btn">Wyloguj</button>
+    </div>
+    <main>
+      <section id="admin-feed" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:.9rem;"></section>
+    </main>
+  </div>
+
+  <nav class="foot-nav">
+    <a href="index.html">Tablica</a>
+    <a href="regulamin.html">Regulamin</a>
+    <a href="changelog.html">Changelog</a>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="config.js"></script>
+  <script>
+    const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function toast(msg){
+      const t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("show");
+      setTimeout(()=>t.classList.remove("show"), 2200);
+    }
+    function esc(s){ const d=document.createElement("div"); d.textContent=s??""; return d.innerHTML; }
+    function fmtTime(iso){
+      return new Date(iso).toLocaleString("pl-PL", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+    }
+
+    async function showPanelIfLoggedIn(){
+      const { data:{ session } } = await supa.auth.getSession();
+      if (session){
+        document.getElementById("login-view").style.display = "none";
+        document.getElementById("panel-view").style.display = "block";
+        loadAll();
+      } else {
+        document.getElementById("login-view").style.display = "block";
+        document.getElementById("panel-view").style.display = "none";
+      }
+    }
+
+    document.getElementById("login-btn").addEventListener("click", async ()=>{
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const errBox = document.getElementById("login-err");
+      errBox.textContent = "";
+      const { error } = await supa.auth.signInWithPassword({ email, password });
+      if (error){ errBox.textContent = "Błędny login lub hasło."; return; }
+      showPanelIfLoggedIn();
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", async ()=>{
+      await supa.auth.signOut();
+      showPanelIfLoggedIn();
+    });
+
+    async function loadAll(){
+      const host = document.getElementById("admin-feed");
+      host.innerHTML = "";
+      const { data, error } = await supa.from("posts").select("*").order("created_at", { ascending:false }).limit(300);
+      if (error || !data || data.length===0){
+        host.innerHTML = `<p class="empty-state">Brak wpisów.</p>`;
+        return;
+      }
+      // grupuj: główne wpisy + ich odpowiedzi
+      const main = data.filter(p=>!p.parent_id);
+      const repliesByParent = {};
+      data.filter(p=>p.parent_id).forEach(r=>{
+        (repliesByParent[r.parent_id] ??= []).push(r);
+      });
+
+      main.forEach(post=>{
+        const card = document.createElement("article");
+        card.className = "note";
+        card.innerHTML = `
+          <div class="meta"><span class="nick">${post.nick?esc(post.nick):"Anonimowy"}</span><span>${fmtTime(post.created_at)}</span></div>
+          <div class="content">${esc(post.content)}</div>
+          <div class="reply-list"></div>
+          <div class="note-actions">
+            <button type="button" class="btn danger" data-del="${post.id}">Usuń wpis</button>
+          </div>`;
+        const rl = card.querySelector(".reply-list");
+        (repliesByParent[post.id]||[]).forEach(r=>{
+          const rd = document.createElement("div");
+          rd.className = "reply";
+          rd.innerHTML = `
+            <div class="meta"><span class="nick">${r.nick?esc(r.nick):"Anonimowy"}</span><span>${fmtTime(r.created_at)}</span></div>
+            <div class="content">${esc(r.content)}</div>
+            <div class="note-actions"><button type="button" class="btn danger" data-del="${r.id}">Usuń odpowiedź</button></div>`;
+          rl.appendChild(rd);
+        });
+        host.appendChild(card);
+      });
+
+      host.querySelectorAll("[data-del]").forEach(btn=>{
+        btn.addEventListener("click", async ()=>{
+          if (!confirm("Usunąć ten wpis?")) return;
+          const { error } = await supa.from("posts").delete().eq("id", btn.dataset.del);
+          if (error){ toast("Nie udało się usunąć."); return; }
+          toast("Usunięto.");
+          loadAll();
+        });
+      });
+    }
+
+    showPanelIfLoggedIn();
+  </script>
+</body>
+</html>

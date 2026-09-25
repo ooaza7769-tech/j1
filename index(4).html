@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spotted: [Nazwa Szkoły]</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+  <header class="top">
+    <h1>Tablica: [Nazwa Szkoły]</h1>
+    <p>Anonimowe kartki. Kliknij kartkę, żeby przeczytać odpowiedzi albo dopisać swoją.</p>
+  </header>
+
+  <main>
+    <div id="compose-host"></div>
+    <section id="feed" class="board"></section>
+  </main>
+
+  <nav class="foot-nav">
+    <a href="regulamin.html">Regulamin</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="admin.html">Panel admina</a>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
