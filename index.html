@@ -10,7 +10,7 @@
 <body>
   <header class="top">
     <!-- TODO: podmień href na docelowy link do Instagrama -->
-    <a href="https://www.instagram.com/space.d3v" class="ig-btn" id="instagram-link" target="_blank" rel="noopener" aria-label="Instagram">
+    <a href="#" class="ig-btn" id="instagram-link" target="_blank" rel="noopener" aria-label="Instagram">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <rect x="3" y="3" width="18" height="18" rx="5"></rect>
         <circle cx="12" cy="12" r="4.2"></circle>
@@ -25,6 +25,13 @@
   <main>
     <div class="layout-grid">
       <div class="corkboard">
+        <div class="board-toolbar">
+          <span class="board-toolbar-label">Sortuj:</span>
+          <div class="sort-toggle" role="group" aria-label="Sortowanie wpisów">
+            <button type="button" class="sort-btn active" data-sort="new">Najnowsze</button>
+            <button type="button" class="sort-btn" data-sort="old">Najstarsze</button>
+          </div>
+        </div>
         <section id="feed" class="board"></section>
       </div>
       <aside id="compose-host" class="compose-sidebar"></aside>
