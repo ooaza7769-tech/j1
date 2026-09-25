@@ -43,6 +43,14 @@ header.top::after{
   background:linear-gradient(90deg, var(--wood-dark), var(--wood-light), var(--wood-dark));
   opacity:.6;
 }
+header.top .site-logo{
+  display:block;
+  max-width:220px;
+  width:60%;
+  height:auto;
+  margin:0 auto .6rem;
+}
+
 header.top .eyebrow{
   display:block;
   font-family:'Inter',sans-serif;
