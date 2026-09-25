@@ -133,6 +133,99 @@ function closeModal(){
   document.removeEventListener("keydown", escHandler);
 }
 
+// --- własna captcha (obrazek z kodem, bez żadnego zewnętrznego serwisu) ---
+function buildCaptcha(host){
+  const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // bez znaków łatwych do pomylenia (0/O, 1/I, itp.)
+  let code = "";
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 150;
+  canvas.height = 46;
+  canvas.className = "captcha-canvas";
+  const ctx = canvas.getContext("2d");
+
+  function randomCode(len){
+    let s = "";
+    for (let i=0; i<len; i++) s += CHARS[Math.floor(Math.random()*CHARS.length)];
+    return s;
+  }
+
+  function draw(){
+    code = randomCode(5);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#EDECE6";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // linie-zakłócenia w tle
+    for (let i=0; i<5; i++){
+      ctx.strokeStyle = `rgba(28,28,26,${0.12 + Math.random()*0.14})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(Math.random()*canvas.width, Math.random()*canvas.height);
+      ctx.lineTo(Math.random()*canvas.width, Math.random()*canvas.height);
+      ctx.stroke();
+    }
+
+    // litery, każda lekko przekrzywiona i przesunięta
+    for (let i=0; i<code.length; i++){
+      const x = 16 + i*25 + (Math.random()*6 - 3);
+      const y = 30 + (Math.random()*8 - 4);
+      const angle = (Math.random()*0.5 - 0.25);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.font = "bold 24px Inter, sans-serif";
+      ctx.fillStyle = "#1C1C1A";
+      ctx.fillText(code[i], 0, 0);
+      ctx.restore();
+    }
+
+    // drobny szum kropkowy
+    for (let i=0; i<35; i++){
+      ctx.fillStyle = `rgba(28,28,26,${Math.random()*0.18})`;
+      ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 1.4, 1.4);
+    }
+  }
+
+  const box = document.createElement("div");
+  box.className = "captcha-box";
+
+  const row = document.createElement("div");
+  row.className = "captcha-row";
+
+  const refreshBtn = document.createElement("button");
+  refreshBtn.type = "button";
+  refreshBtn.className = "captcha-refresh";
+  refreshBtn.title = "Losuj nowy kod";
+  refreshBtn.textContent = "⟳";
+  refreshBtn.addEventListener("click", ()=>{ draw(); input.value = ""; });
+
+  row.appendChild(canvas);
+  row.appendChild(refreshBtn);
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "captcha-input";
+  input.placeholder = "przepisz kod z obrazka";
+  input.autocomplete = "off";
+  input.maxLength = 8;
+
+  box.appendChild(row);
+  box.appendChild(input);
+  host.appendChild(box);
+
+  draw();
+
+  return {
+    verify(){
+      const ok = input.value.trim().toUpperCase() === code;
+      draw();
+      input.value = "";
+      return ok;
+    }
+  };
+}
+
 // --- formularz (główny wpis lub odpowiedź w modalu) ---
 function buildForm({ parentId=null, small=false, onSuccess=null } = {}){
   const form = document.createElement("form");
@@ -149,8 +242,8 @@ function buildForm({ parentId=null, small=false, onSuccess=null } = {}){
     </div>
     <textarea maxlength="${MAX_CONTENT_LEN}" placeholder="${small ? 'twoja odpowiedź...' : 'co się dzieje w szkole?'}" data-content required></textarea>
     <div class="char-count" data-count>0 / ${MAX_CONTENT_LEN}</div>
-    <div class="turnstile-wrap" data-turnstile></div>
-    <button type="submit" class="btn" data-submit disabled>${small ? "Odpowiedz" : "Przypnij wpis"}</button>
+    <div class="captcha-host" data-captcha></div>
+    <button type="submit" class="btn" data-submit>${small ? "Odpowiedz" : "Przypnij wpis"}</button>
   `;
 
   const anon = form.querySelector(`#anon-${uid}`);
@@ -165,20 +258,12 @@ function buildForm({ parentId=null, small=false, onSuccess=null } = {}){
   });
 
   const submitBtn = form.querySelector("[data-submit]");
-  const tsHost = form.querySelector("[data-turnstile]");
-  let token = null;
-
-  if (window.turnstile){
-    window.turnstile.render(tsHost, {
-      sitekey: TURNSTILE_SITE_KEY,
-      callback: (t)=>{ token = t; submitBtn.disabled = false; },
-      "expired-callback": ()=>{ token = null; submitBtn.disabled = true; },
-    });
-  }
+  const captchaHost = form.querySelector("[data-captcha]");
+  const captcha = buildCaptcha(captchaHost);
 
   form.addEventListener("submit", async (e)=>{
     e.preventDefault();
-    if (!token){ toast("Rozwiąż captchę."); return; }
+    if (!captcha.verify()){ toast("Błędny kod z obrazka. Spróbuj ponownie."); return; }
     const content = ta.value.trim();
     if (!content) return;
     const nick = anon.checked ? null : (form.querySelector("[data-nick]").value.trim() || null);
@@ -193,9 +278,7 @@ function buildForm({ parentId=null, small=false, onSuccess=null } = {}){
     toast(parentId ? "Odpowiedź dodana." : "Wpis przypięty.");
     form.reset();
     count.textContent = `0 / ${MAX_CONTENT_LEN}`;
-    if (window.turnstile) window.turnstile.reset(tsHost);
-    token = null;
-    submitBtn.disabled = true;
+    submitBtn.disabled = false;
 
     if (onSuccess) onSuccess();
     else loadFeed();
