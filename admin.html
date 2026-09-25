@@ -3,12 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Panel admina — Spotted</title>
+<title>Panel admina — Spotted: I LO Wodzisław Śląski</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <header class="top"><h1>Panel admina</h1></header>
+  <header class="top">
+    <span class="eyebrow">tablica ogłoszeń</span>
+    <h1>Panel admina</h1>
+    <p>Spotted: I LO Wodzisław Śląski</p>
+  </header>
 
   <div id="login-view" class="page login-box">
     <h2>Logowanie</h2>
@@ -103,11 +107,16 @@
             <button type="button" class="btn danger" data-del="${post.id}">Usuń wpis</button>
           </div>`;
         const rl = card.querySelector(".reply-list");
-        (repliesByParent[post.id]||[]).forEach(r=>{
+        const repliesForPost = (repliesByParent[post.id]||[]).sort((a,b)=> new Date(a.created_at) - new Date(b.created_at));
+        const byId = {}; data.forEach(p=> byId[p.id] = p);
+        repliesForPost.forEach(r=>{
+          const target = r.reply_to_id ? byId[r.reply_to_id] : null;
+          const targetNick = target ? (target.nick?esc(target.nick):"Anonimowy") : (post.nick?esc(post.nick):"Anonimowy");
           const rd = document.createElement("div");
           rd.className = "reply";
           rd.innerHTML = `
-            <div class="meta"><span class="nick">${r.nick?esc(r.nick):"Anonimowy"}</span><span>${fmtTime(r.created_at)}</span></div>
+            <div class="reply-to"><span class="arrow">↳</span>${r.nick?esc(r.nick):"Anonimowy"} odpowiada <b>${targetNick}</b></div>
+            <div class="meta"><span>${fmtTime(r.created_at)}</span></div>
             <div class="content">${esc(r.content)}</div>
             <div class="note-actions"><button type="button" class="btn danger" data-del="${r.id}">Usuń odpowiedź</button></div>`;
           rl.appendChild(rd);
