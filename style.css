@@ -45,10 +45,14 @@ header.top::after{
 }
 header.top .eyebrow{
   display:block;
-  font-family:'Caveat',cursive;
-  font-size:1.15rem;
+  font-family:'Inter',sans-serif;
+  font-weight:800;
+  font-size:clamp(1.5rem,5.5vw,2.3rem);
+  letter-spacing:.08em;
+  text-transform:uppercase;
   color:#E8C876;
-  margin-bottom:.15rem;
+  text-shadow:0 2px 4px rgba(0,0,0,.35);
+  margin-bottom:.35rem;
   transform:rotate(-1deg);
 }
 header.top h1{
@@ -335,6 +339,18 @@ form.compose .nick-field{max-width:150px;}
   flex:0 0 250px;
   max-width:250px;
 }
+.thread-main-label{
+  display:inline-block;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--wood-dark);
+  background:var(--cork);
+  padding:.22rem .55rem;
+  border-radius:999px;
+  margin-bottom:.55rem;
+}
 .thread-main .note{
   cursor:default;
   transform:rotate(-1.2deg);
@@ -352,6 +368,11 @@ form.compose .nick-field{max-width:150px;}
 .thread-side-label{
   font-size:.72rem; text-transform:uppercase; letter-spacing:.05em;
   color:var(--ink-soft); font-weight:700; margin:.2rem 0 .6rem;
+  padding-bottom:.5rem;
+  border-bottom:1px solid var(--border);
+}
+@media (min-width:641px){
+  .thread-side{ border-left:1px solid var(--border); padding-left:1.2rem; }
 }
 .reply-list{display:flex; flex-direction:column; gap:.6rem; margin-bottom:1rem;}
 .reply{
@@ -437,4 +458,3 @@ form.compose .nick-field{max-width:150px;}
   #feed.board{grid-template-columns:1fr;}
   .corkboard{padding:1.1rem .8rem;}
 }
-
