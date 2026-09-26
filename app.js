@@ -1,6 +1,6 @@
 const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let allPosts = [];
-let sortOrder = "new"; // "new" = najnowsze pierwsze (domyślnie), "old" = najstarsze pierwsze
+let sortOrder = "new"; 
 
 function sortMain(posts){
   const arr = [...posts];
@@ -25,8 +25,6 @@ function toast(msg){
   setTimeout(()=>t.classList.remove("show"), 2200);
 }
 
-// usuwa (po stronie klienta) wpisy starsze niż 30 dni — dodatkowe
-// zabezpieczenie obok zaplanowanego zadania pg_cron w Supabase
 async function cleanupOld(){
   const cutoff = new Date(Date.now() - 30*24*60*60*1000).toISOString();
   await supa.from("posts").delete().lt("created_at", cutoff);
@@ -76,7 +74,7 @@ function renderCard(post){
   return card;
 }
 
-// --- modal "przybliżenia" kartki + odpowiadanie ---
+
 function openModal(postId){
   const post = allPosts.find(p=>p.id === postId);
   if (!post) return;
@@ -152,7 +150,6 @@ function renderReplies(postId, host){
 }
 
 async function refreshPost(postId){
-  // dociąga świeże dane wpisu + jego odpowiedzi i po cichu odświeża siatkę w tle
   const { data } = await supa.from("posts").select("*").or(`id.eq.${postId},parent_id.eq.${postId}`);
   if (!data) return;
   allPosts = allPosts.filter(p=> p.id !== postId && p.parent_id !== postId).concat(data);
@@ -166,9 +163,9 @@ function closeModal(){
   document.removeEventListener("keydown", escHandler);
 }
 
-// --- własna captcha (obrazek z kodem, bez żadnego zewnętrznego serwisu) ---
+
 function buildCaptcha(host){
-  const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // bez znaków łatwych do pomylenia (0/O, 1/I, itp.)
+  const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 
   let code = "";
 
   const canvas = document.createElement("canvas");
@@ -189,7 +186,7 @@ function buildCaptcha(host){
     ctx.fillStyle = "#EDECE6";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // linie-zakłócenia w tle
+    
     for (let i=0; i<5; i++){
       ctx.strokeStyle = `rgba(28,28,26,${0.12 + Math.random()*0.14})`;
       ctx.lineWidth = 1;
@@ -199,7 +196,7 @@ function buildCaptcha(host){
       ctx.stroke();
     }
 
-    // litery, każda lekko przekrzywiona i przesunięta
+
     for (let i=0; i<code.length; i++){
       const x = 16 + i*25 + (Math.random()*6 - 3);
       const y = 30 + (Math.random()*8 - 4);
@@ -213,7 +210,7 @@ function buildCaptcha(host){
       ctx.restore();
     }
 
-    // drobny szum kropkowy
+
     for (let i=0; i<35; i++){
       ctx.fillStyle = `rgba(28,28,26,${Math.random()*0.18})`;
       ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 1.4, 1.4);
@@ -259,7 +256,7 @@ function buildCaptcha(host){
   };
 }
 
-// --- formularz (główny wpis lub odpowiedź w modalu) ---
+
 function buildForm({ parentId=null, small=false, onSuccess=null } = {}){
   const form = document.createElement("form");
   form.className = "compose";
